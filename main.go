@@ -276,6 +276,11 @@ func makeForkRequestHandler(watchdogConfig config.WatchdogConfig) func(http.Resp
 			environment = getEnvironment(r)
 		}
 
+		traceID := r.Header.Get("TraceID")
+
+		if traceID == "" {
+			traceID = "default_trace_id"
+		}
 		commandName, arguments := watchdogConfig.Process()
 		req := executor.FunctionRequest{
 			Process:      commandName,
@@ -283,6 +288,7 @@ func makeForkRequestHandler(watchdogConfig config.WatchdogConfig) func(http.Resp
 			InputReader:  r.Body,
 			OutputWriter: w,
 			Environment:  environment,
+			TractID:      r.Header.Get("TraceID"),
 		}
 
 		w.Header().Set("Content-Type", watchdogConfig.ContentType)

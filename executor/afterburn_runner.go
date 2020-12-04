@@ -43,7 +43,7 @@ func (f *AfterBurnFunctionRunner) Start() error {
 	errPipe, _ := cmd.StderrPipe()
 
 	// Prints stderr to console and is picked up by container logging driver.
-	bindLoggingPipe("stderr", errPipe, os.Stderr)
+	bindLoggingPipe("stderr", "no_tag", errPipe, os.Stderr)
 
 	return cmd.Start()
 }

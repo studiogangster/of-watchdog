@@ -53,8 +53,8 @@ func (f *HTTPFunctionRunner) Start() error {
 	errPipe, _ := cmd.StderrPipe()
 
 	// Logs lines from stderr and stdout to the stderr and stdout of this process
-	bindLoggingPipe("stderr", errPipe, os.Stderr)
-	bindLoggingPipe("stdout", f.StdoutPipe, os.Stdout)
+	bindLoggingPipe("stderr", "no_tag", errPipe, os.Stderr)
+	bindLoggingPipe("stdout", "no_tag", f.StdoutPipe, os.Stdout)
 
 	f.Client = makeProxyClient(f.ExecTimeout)
 

@@ -23,6 +23,7 @@ type FunctionRequest struct {
 	InputReader   io.ReadCloser
 	OutputWriter  io.Writer
 	ContentLength *int64
+	TractID       string
 }
 
 // ForkFunctionRunner forks a process for each invocation
@@ -60,17 +61,18 @@ func (f *ForkFunctionRunner) Run(req FunctionRequest) error {
 		defer req.InputReader.Close()
 		cmd.Stdin = req.InputReader
 	}
-
 	cmd.Stdout = req.OutputWriter
 
-	errPipe, _ := cmd.StderrPipe()
-
 	// Prints stderr to console and is picked up by container logging driver.
-	bindLoggingPipe("stderr", errPipe, os.Stderr)
+	errPipe, _ := cmd.StderrPipe()
+	log.Printf("TractId", req.TractID)
+
+	bindLoggingPipe("stderr", "required_tag", errPipe, os.Stderr)
 
 	startErr := cmd.Start()
 
 	if startErr != nil {
+
 		return startErr
 	}
 
