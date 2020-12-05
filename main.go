@@ -288,7 +288,7 @@ func makeForkRequestHandler(watchdogConfig config.WatchdogConfig) func(http.Resp
 			InputReader:  r.Body,
 			OutputWriter: w,
 			Environment:  environment,
-			TractID:      r.Header.Get("TraceID"),
+			TractID:      traceID,
 		}
 
 		w.Header().Set("Content-Type", watchdogConfig.ContentType)

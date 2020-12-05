@@ -1,4 +1,4 @@
-FROM openfaas/of-watchdog:build as build
+FROM rounak316/of-watchdog:build as build
 FROM scratch
 
 ARG PLATFORM

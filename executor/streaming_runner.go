@@ -65,9 +65,9 @@ func (f *ForkFunctionRunner) Run(req FunctionRequest) error {
 
 	// Prints stderr to console and is picked up by container logging driver.
 	errPipe, _ := cmd.StderrPipe()
-	log.Printf("TractId", req.TractID)
+	// log.Printf("TractId", req.TractID)
 
-	bindLoggingPipe("stderr", "required_tag", errPipe, os.Stderr)
+	bindLoggingPipe("stderr", req.TractID, errPipe, os.Stderr)
 
 	startErr := cmd.Start()
 

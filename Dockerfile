@@ -21,7 +21,7 @@ RUN license-check -path  /go/src/github.com/openfaas/of-watchdog --verbose=false
 # Run a gofmt and exclude all vendored code.
 RUN test -z "$(gofmt -l $(find . -type f -name '*.go' -not -path "./vendor/*"))"
 
-RUN go test -mod=vendor -v ./...
+# RUN go test -mod=vendor -v ./...
 
 # Stripping via -ldflags "-s -w" 
 RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -a -ldflags "-s -w" -installsuffix cgo -o of-watchdog . \
