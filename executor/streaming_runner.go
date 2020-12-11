@@ -34,9 +34,12 @@ type ForkFunctionRunner struct {
 }
 
 var logger, _ = fluent.New(fluent.Config{
-	FluentPort: 24224,
-	FluentHost: "localhost",
-	TagPrefix:  "watchdog",
+	FluentPort:   24224,
+	FluentHost:   "localhost",
+	TagPrefix:    "watchdog",
+	MaxRetryWait: 4,
+	Async:        true,
+	MaxRetry:     0,
 })
 
 // Run run a fork for each invocation
