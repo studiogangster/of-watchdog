@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
+	"strconv"
 	"sync"
 	"time"
 
@@ -33,9 +35,27 @@ type ForkFunctionRunner struct {
 	ExecTimeout time.Duration
 }
 
+func getenvStr(key string, defaultValue string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		return defaultValue
+	}
+	return v
+}
+
+func getenvInt(key string, defaultValue int) int {
+	s := getenvStr(key, strconv.Itoa(defaultValue))
+
+	v, err := strconv.Atoi(s)
+	if err != nil {
+		return 0
+	}
+	return v
+}
+
 var logger, _ = fluent.New(fluent.Config{
-	FluentPort:   24224,
-	FluentHost:   "localhost",
+	FluentPort:   getenvInt("fluent_port", 24224),
+	FluentHost:   getenvStr("fluent_host", "localhost"),
 	TagPrefix:    "watchdog",
 	MaxRetryWait: 4,
 	Async:        true,
