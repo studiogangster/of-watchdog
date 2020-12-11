@@ -1,6 +1,5 @@
 FROM rounak316/of-watchdog:build as build
-FROM scratch
+FROM scratch`
 
 ARG PLATFORM
-
 COPY --from=build /go/src/github.com/openfaas/of-watchdog/of-watchdog$PLATFORM ./fwatchdog

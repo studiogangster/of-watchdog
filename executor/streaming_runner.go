@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"os/exec"
+	"sync"
 	"time"
+
+	"github.com/fluent/fluent-logger-golang/fluent"
 )
 
 // FunctionRunner runs a function
@@ -30,6 +32,12 @@ type FunctionRequest struct {
 type ForkFunctionRunner struct {
 	ExecTimeout time.Duration
 }
+
+var logger, _ = fluent.New(fluent.Config{
+	FluentPort: 24224,
+	FluentHost: "localhost",
+	TagPrefix:  "watchdog",
+})
 
 // Run run a fork for each invocation
 func (f *ForkFunctionRunner) Run(req FunctionRequest) error {
@@ -61,20 +69,34 @@ func (f *ForkFunctionRunner) Run(req FunctionRequest) error {
 		defer req.InputReader.Close()
 		cmd.Stdin = req.InputReader
 	}
-	cmd.Stdout = req.OutputWriter
+	// cmd.Stdout = req.OutputWriter
 
 	// Prints stderr to console and is picked up by container logging driver.
 	errPipe, _ := cmd.StderrPipe()
+	stdoutPipe, _ := cmd.StdoutPipe()
 	// log.Printf("TractId", req.TractID)
 
-	bindLoggingPipe("stderr", req.TractID, errPipe, os.Stderr)
+	var wg sync.WaitGroup
+	bindFluentLoggingPipe(logger, "stderr", req.TractID, errPipe, &wg)
+	bindFluentLoggingPipe(logger, "stdout", req.TractID, stdoutPipe, &wg)
 
 	startErr := cmd.Start()
+	wg.Wait()
 
 	if startErr != nil {
+		log.Println("Starting error", startErr)
 
+		logger.Post(req.TractID, map[string]string{
+			"pipe":    "stdend",
+			"message": startErr.Error(),
+		})
 		return startErr
 	}
+
+	logger.Post(req.TractID, map[string]string{
+		"pipe":    "stdend",
+		"message": "Process completed successfully",
+	})
 
 	waitErr := cmd.Wait()
 	done := time.Since(start)
@@ -84,6 +106,8 @@ func (f *ForkFunctionRunner) Run(req FunctionRequest) error {
 	}
 
 	req.InputReader.Close()
+
+	req.OutputWriter.Write([]byte("Trace-ID: " + req.TractID))
 
 	if waitErr != nil {
 		return waitErr
